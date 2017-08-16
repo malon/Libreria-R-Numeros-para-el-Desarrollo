@@ -5,23 +5,42 @@ date: "Monday, July 31, 2017"
 output: html_document
 ---
 
-## Introducción 
+# Introduction
 
-## Instalación de R y Rstudio
+## Instalation of R and RStudio
+You should have installed both R and RStudio.
+
+Use the following links, download the latest version for your operative system. Install and follow the instructions:
+[R](https://cran.rstudio.com/)
+[RStudio] (https://www.rstudio.com/products/rstudio/download/#download)
+
+## Download the Tutorial and preparing for the workshop
+Download this file from this [link](https://github.com/malon/Libreria-R-Numeros-para-el-Desarrollo/blob/Tutorial/Tutorial.Rmd) and open it in RStudio.
+
+This is a RMarkDown file, it contains both explanations and code for you to execute. If you want to understand the MarkDown sintaxis better go to the following menu: Help>Markdown Quick Reference.
+
+Code cells are in grey color and to execute them you just have to press the green triangle in the upper right corner. Now follow the steps of the tutorial and execute one cell each time checking what your result is.
 
 
+# Step 1: Download the necessary libraries
+Be aware that if you are using the BID corporate wifi you have to disconnect from this network and connect to the open BID-GUEST network. This is a hidden network, you might not see this network in the list of available ones. You should add a new network and type the name of the SSID manually: "BID-GUEST".
 
-Paso 1: desconectate de la red Banco y con'ectate a Guest B
-## Descarga de librerias
 ```{r}
 install.packages('devtools')
 library(devtools)
-install_github('arcuellar88/iadbstats')
-library('iadbstats') 
 
 install.packages('ggplot2')
 library(ggplot2)
 ```
+
+
+
+```{r}
+install_github('arcuellar88/iadbstats')
+library('iadbstats') 
+```
+
+
 
 ## Consulta los inidicadores disponibles
 ```{r}
