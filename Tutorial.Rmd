@@ -11,8 +11,9 @@ output: html_document
 You should have installed both R and RStudio.
 
 Use the following links, download the latest version for your operative system. Install and follow the instructions:
-[R](https://cran.rstudio.com/)
-[RStudio] (https://www.rstudio.com/products/rstudio/download/#download)
+
+* [R](https://cran.rstudio.com/)
+* [RStudio](https://www.rstudio.com/products/rstudio/download/#download)
 
 ## Download the Tutorial and preparing for the workshop
 Download this file from this [link](https://github.com/malon/Libreria-R-Numeros-para-el-Desarrollo/blob/Tutorial/Tutorial.Rmd) and open it in RStudio.
