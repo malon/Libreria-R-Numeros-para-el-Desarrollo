@@ -1,6 +1,6 @@
 ---
 title: "Taller R BID"
-author: "Marta Alonso Fernández y Jose Luis Delgado Davara"
+author: "Marta Alonso Fern?ndez y Jose Luis Delgado Davara"
 date: "Monday, July 31, 2017"
 output: html_document
 ---
@@ -15,13 +15,17 @@ Use the following links, download the latest version for your operative system. 
 * [R](https://cran.rstudio.com/)
 * [RStudio](https://www.rstudio.com/products/rstudio/download/#download)
 
-## Download the Tutorial and preparing for the workshop
-Download this file from this [link](https://github.com/malon/Libreria-R-Numeros-para-el-Desarrollo/blob/Tutorial/Tutorial.Rmd) and open it in RStudio.
+## Download the workshop guide and get ready
+Download this file from the following [link](https://github.com/malon/Libreria-R-Numeros-para-el-Desarrollo/blob/Tutorial/Tutorial.Rmd) and open it in RStudio.
 
 This is a RMarkDown file, it contains both explanations and code for you to execute. If you want to understand the MarkDown sintaxis better go to the following menu: Help>Markdown Quick Reference.
 
 Code cells are in grey color and to execute them you just have to press the green triangle in the upper right corner. Now follow the steps of the tutorial and execute one cell each time checking what your result is.
 
+## Some Tutorials
+
+* If you want to dive into the R language basics follow this [tutorial](http://www.r-tutor.com/r-introduction).
+* If you are looking for understanding how to navigate RStudio check out this [RStudio 101 tutorial](http://dss.princeton.edu/training/RStudio101.pdf) 
 
 # Step 1: Download the necessary libraries
 Be aware that if you are using the BID corporate wifi you have to disconnect from this network and connect to the open BID-GUEST network. This is a hidden network, you might not see this network in the list of available ones. You should add a new network and type the name of the SSID manually: "BID-GUEST".
@@ -43,14 +47,60 @@ library('iadbstats')
 
 
 
-## Consulta los inidicadores disponibles
-```{r}
-A = iadbmsearch(value='ALL')
+## API accessing indicators metadata
+Available metadata are:
 
-data<-iadbstats(country="ARG,COL",frequency="year",indicatorcode="SOC_050")
+* Country
+* Indicator -> the only one retrieved by this R library 
+* Data Topics
+* Data Sub Topics
+
+```{r}
+meta_ind <- iadbmsearch(value='ALL')
+head(meta_ind)
+class(meta_ind)
+nrow(meta_ind)
+```
+```{r}
+meta_ind[meta_ind$TopicName == "Social Outlook",c("IndicatorCode", "SubTopicName")]
+
+```
+```{r}
+library(dplyr)
+#meta_indicators <- meta_indicators %>% filter(grepl (pattern= "male|women", tolower(IndicatorName)))
+boolean_filter <- grepl(pattern = "male|women", meta_ind$IndicatorName, ignore.case = TRUE)
+boolean_filter
+meta_ind_gender <- filter(meta_ind, boolean_filter )
+length(meta_ind_gender$IndicatorName)
+
+```
+```{r}
+unique(meta_ind_gender$SubTopicName)
+grouped <- group_by(meta_ind_gender,meta_ind_gender$SubTopicName)
+summarise(grouped,   n = n())
+```
+```{r}
+meta_ind_gender_demo <- meta_ind_gender[meta_ind_gender$SubTopicName == "Demographics", ]
+class(meta_ind_gender_demo)
+meta_ind_gender_demo[c("IndicatorCode", "IndicatorName")]
 ```
 
-## Disbuja los indicadores en una gráfica
+## API accessing data
+
+```{r}
+data<-iadbstats(country="All",frequency="year",indicatorcode="SOC_050")
+head(data)
+typeof(data)
+```
+```{r}
+#Download indicator data for a vector of indicators and all the countries
+#ind<-iadbstats.list(indicatorCodes=meta_indicators_gender$IndicatorCode)
+#Select columns
+#ind_data <-select(ind, -CountryTableName, -IndicatorName, -SubTopicName , -Quarter, -Month, -AggregationLevel, -UOM, -TopicName) 
+#head(ind_data)
+```
+
+## Dibuja los indicadores en una gr?fica
 ```{r}
 ggplot(data, aes(x=Year, y=AggregatedValue, color=CountryTableName)) + geom_point() +   xlab('Year') + ylab('% house holds economically headed by females')
 ```
