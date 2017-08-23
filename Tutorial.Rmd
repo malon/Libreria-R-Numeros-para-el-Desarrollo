@@ -61,7 +61,7 @@ ggplot(data, aes(x=Year, y=AggregatedValue, color=CountryTableName, group = Coun
   theme(text = element_text(size=7))
 ```
 
-# 2. The long path, learning in more detail
+# 3. The long path, learning in more detail
 
 ## API accessing indicators metadata
 Available metadata are:
