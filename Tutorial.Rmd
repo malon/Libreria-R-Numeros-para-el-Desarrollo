@@ -5,7 +5,7 @@ date: "Monday, July 31, 2017"
 output: html_document
 ---
 
-# Introduction
+# 0. Introduction
 
 ## Instalation of R and RStudio
 You should have installed both R and RStudio.
@@ -27,7 +27,7 @@ Code cells are in grey color and to execute them you just have to press the gree
 * If you want to dive into the R language basics follow this [tutorial](http://www.r-tutor.com/r-introduction).
 * If you are looking for understanding how to navigate RStudio check out this [RStudio 101 tutorial](http://dss.princeton.edu/training/RStudio101.pdf) 
 
-# Step 1: Download the necessary libraries
+# 1: Setting up the environment - Download the necessary libraries
 Be aware that if you are using the BID corporate wifi you have to disconnect from this network and connect to the open BID-GUEST network. This is a hidden network, you might not see this network in the list of available ones. You should add a new network and type the name of the SSID manually: "BID-GUEST".
 
 ```{r}
@@ -45,7 +45,23 @@ install_github('arcuellar88/iadbstats')
 library('iadbstats') 
 ```
 
+# 2. The express path, plotting a graph in ten seconds
 
+More explanations here...
+help:
+https://kohske.wordpress.com/2010/12/27/faq-geom_line-doesnt-draw-lines/
+
+```{r}
+data<-iadbstats(country="ARG,COL",frequency="year",indicatorcode="SOC_050")
+ggplot(data, aes(x=Year, y=AggregatedValue, color=CountryTableName, group = CountryTableName)) + 
+  geom_point() +   
+  geom_line() +
+  xlab('Year') + 
+  ylab('% house holds economically headed by females') +
+  theme(text = element_text(size=7))
+```
+
+# 2. The long path, learning in more detail
 
 ## API accessing indicators metadata
 Available metadata are:
@@ -70,6 +86,7 @@ library(dplyr)
 #meta_indicators <- meta_indicators %>% filter(grepl (pattern= "male|women", tolower(IndicatorName)))
 boolean_filter <- grepl(pattern = "male|women", meta_ind$IndicatorName, ignore.case = TRUE)
 boolean_filter
+#filter: return rows with matching conditions
 meta_ind_gender <- filter(meta_ind, boolean_filter )
 length(meta_ind_gender$IndicatorName)
 
@@ -79,11 +96,23 @@ unique(meta_ind_gender$SubTopicName)
 grouped <- group_by(meta_ind_gender,meta_ind_gender$SubTopicName)
 summarise(grouped,   n = n())
 ```
+Reading all the demographics indicators related to gender
+
 ```{r}
 meta_ind_gender_demo <- meta_ind_gender[meta_ind_gender$SubTopicName == "Demographics", ]
 class(meta_ind_gender_demo)
 meta_ind_gender_demo[c("IndicatorCode", "IndicatorName")]
 ```
+
+
+Reading education indicators related to gender
+```{r}
+meta_ind_gender_edu <- meta_ind_gender[meta_ind_gender$SubTopicName == "Education", ]
+class(meta_ind_gender_edu)
+meta_ind_gender_edu[c("IndicatorCode", "IndicatorName")]
+
+```
+
 
 ## API accessing data
 
