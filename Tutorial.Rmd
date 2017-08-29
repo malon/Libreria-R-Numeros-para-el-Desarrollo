@@ -1,13 +1,13 @@
 ---
 title: "Taller R BID"
-author: "Marta Alonso Fernandez & Jose Luis Delgado Davara"
+author: "Marta Alonso Fernandez (martaal@iadb.org) & Jose Luis Delgado Davara (josede@iadb.org)"
 date: "Thursday, July 31, 2017"
-output: html_document
+output: html_notebook
 ---
 
-# 0. Introduction
+# 1. Introduction
 
-### Instalation of R and RStudio
+### 1.1 Instalation of R and RStudio
 You should have installed both R and RStudio.
 
 Use the following links, download the latest version for your operative system. Install and follow the instructions:
@@ -15,30 +15,32 @@ Use the following links, download the latest version for your operative system. 
 * [R](https://cran.rstudio.com/)
 * [RStudio](https://www.rstudio.com/products/rstudio/download/#download)
 
-### What is R?
+### 1.2 What is R?
 R is a language and environment for statistical computing and graphics. To make a long story really short we could say that it is the Free Software version of a previous language called S dedicated to statistical processing. See some documentation in the following paragraph.
 
-### Some Tutorials
+### 1.3 Some Tutorials
 
 * If you want to dive into the R language basics follow this [tutorial](http://www.r-tutor.com/r-introduction).
 * If you are looking for understanding how to navigate RStudio check out this [RStudio 101 tutorial](http://dss.princeton.edu/training/RStudio101.pdf) 
 
-### Download the workshop guide and get ready
+### 1.4 Download the workshop guide and get ready
 Download this file from the following [link](https://github.com/malon/Libreria-R-Numeros-para-el-Desarrollo/blob/Tutorial/Tutorial.Rmd) and open it in RStudio.
 
 This is a RMarkDown file, it contains both explanations and code for you to execute. If you want to understand the MarkDown sintaxis better, go to the following menu: Help>Markdown Quick Reference.
 
 Code cells are in grey color called "Code chunks" between three single quotes. To execute them you just have to press the green triangle in the upper right corner. To see the output directly inside the file press the small arrow close to the wheel in the meny over the file and select "Chunk Output Inline". You can create as many "Code chunks" as you want presseing the button insert in the upper right corner of the file and selecting as type of code "R". A "Code chunk" will be created wherever your cursor is placed.
 
-
 Now follow the steps of the tutorial and execute one cell each time checking what your result is.
 
 
-# 1.Setting up the environment - necessary libraries
+# 2. Setting up the environment 
+### 2.1 Necessary libraries
 Be aware that if you are using the BID corporate wifi you have to disconnect from this network and connect to the open BID-GUEST network. This is a hidden network, you might not see this network in the list of available ones. You should add a new network and type the name of the SSID manually: "BID-GUEST".
 
 ```{r}
 # This is a comment, anything written after a numeral symbol (#) insider a "Code chunk" will not be executed.
+
+# Necessary R libraries
 chooseCRANmirror(graphics=FALSE, ind=1)
 
 install.packages('devtools')
@@ -46,24 +48,36 @@ library(devtools)
 
 install.packages('ggplot2')
 library(ggplot2)
-
 ```
 
 
 
 ```{r}
+# Installing Numbers for development R library
 install_github('arcuellar88/iadbstats')
 library('iadbstats') 
 ```
 
-# 2. The express path, plotting a graph in ten seconds
+----> Add a check code for checking if the libraries were installed
 
-More explanations here...
-help:
-https://kohske.wordpress.com/2010/12/27/faq-geom_line-doesnt-draw-lines/
+
+# 3. The express path: results in ten seconds
+
+In this chunk of code we just use two functions:
+
+* first one is **"iadbstats"**, with which we are accessing the API to retrieve an indicator and we store the result in the variable data. To call iadbstats directly we should know the name of the indicator we want to download, in this case SOC_050 which is the identifier of the indicator "% of households economically headed by females"
+* second one is **"ggplot"** a function to plot graphs in this case we are combining a point graph and a line graph
+
+You can run the chunk of code and see the results, the code is not that difficult to understand, and you can change anything you want in your graph and rerun the chunk so you can se your results.
+
+**NOTE**: You can use All for **countries** and **indicatorcode** but not at the same time:
+
+* When **All** indicators data is requested, data can be requested for a maximum of 4 countries (ex: country="ARG,COL")
+* When **All** country data is requested, data can be requested for a maximum of 10 indicators (ex: indicatorcode="SOC_050,SOC_1050")
+
 
 ```{r}
-data<-iadbstats(country="ARG,COL",frequency="year",indicatorcode="SOC_050")
+data <- iadbstats(country="ARG,COL",frequency="year",indicatorcode="SOC_050")
 ggplot(data, aes(x=Year, y=AggregatedValue, color=CountryTableName, group = CountryTableName)) + 
   geom_point() +   
   geom_line() +
@@ -74,20 +88,20 @@ ggplot(data, aes(x=Year, y=AggregatedValue, color=CountryTableName, group = Coun
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"))
 ```
 
-# 3. The long path, learning in more detail
+# 4. The long path, more details
 
-### 3.1 Accessing indicators metadata through the API
+### 4.1 Accessing indicators metadata through the API
 
-#### What is metadata?
+#### 4.1.1 What is metadata?
 Metadata is literally data about data :). Metadata provide information that characterized the given data, they could describe its content, quality, conditions, history, availability and other features.
 
-#### What is an API?
-API (Application Programming Interface) is a communication interface between software components. They offer access to several services, in our case the Numbers 4 Development API offers access to the information it contains. The easieast way to access is via a browser, try to copy the following link in you browser and see the result you obtained.
+#### 4.1.2 What is an API?
+API (Application Programming Interface) is a communication interface between software components. They offer access to several services, in our case the [Numbers 4 Development API](https://data.iadb.org/NumbersForDevelopment/NumbersForDevelopment) offers access to the information it contains. The easieast way to access is via a browser, try to copy the following link in you browser and see the result you obtained.
 http://api-data.iadb.org/metadata/country?searchtype=code&searchvalue=COL&languagecode=en&responsetype=xml
 
 You are accesing metadata information from Colombia. In this case using a format called XML. What we will do in this workshop is creating calls to the API, but instead of using a browser we will use R code so we can process the results easily.
 
-#### How to access the metadata from Numbers4Development?
+#### 4.1.3 How to access the metadata from Numbers4Development?
 N4D API provides metadata about:
 
 * Country
@@ -95,137 +109,153 @@ N4D API provides metadata about:
 * Data Topics
 * Data Sub Topics
 
-The R method to access metadata about indicators is "iadbmsearch" with parameter value='ALL' to access metadata of all the indicators or value='<indicator_code>' to get the metadata of just one specific indicator.
+The R function to access metadata about indicators is **"iadbmsearch"** with parameter value='ALL' to access metadata of all the indicators or value='<indicator_code>' to get the metadata of just one specific indicator. We store the results in an object called **meta_ind**:
 
 ```{r}
 # saving the response from the API in the meta_ind object
 meta_ind <- iadbmsearch(value='All')
 ```
 
-```{r}
-# Inspecting the first six lines of the object meta_ind (head command) and only two of its columns: 'IndicatorCode' and 'IndicatorName'
-head(meta_ind[c('IndicatorCode', 'IndicatorName')])
+
+#### 4.1.4 Working with our results table
+```{r results="hide"}
+# Note: We are using results="hide" because we will create a final file with all your results and we want this output to be hidden because it is too big
+
+
+# Inspecting the first six lines of the object meta_ind (with the "head" command) 
+head(meta_ind)
 ```
 
-#### Working with our new table
+What class of object is meta_ind? We are going to check its type and the number of lines it contains.
 
 ```{r}
-# What class of object is meta_ind? and how many lines does it contain?
+# Using the class and nrow commands
 class(meta_ind)
 nrow(meta_ind)
 ```
 
-DataFrames are objects that store data tables. 
-You can see the objects you have created so far in the tab Environment (upper right corner of your RStudio editor). As you can see meta_ind has 1730 rows (observations) and 25 variables (columns). Clicking on the little table on the right of meta_ind you will open a view of the table in the main window.
+**DataFrames** are objects that store data tables. You can also see the objects you have created so far in the tab Environment (upper right corner of your RStudio editor). As you can see meta_ind has 1730 rows (observations) and 25 variables (columns). Clicking on the little table on the right of meta_ind you will open a view of the table in the main window.
 
-
+Let´s access only one of the columns, and see how many different values it has:
 
 ```{r}
-meta_ind[meta_ind$TopicName == "Social Outlook",c("IndicatorCode", "SubTopicName")]
-
+# We use the symbol $ to acces a column of the dataframe
+topics <- meta_ind$TopicName
+# With the command unique we just see the different values in the column topics
+unique(topics)
 ```
 
 
-##### Filtering tables
-We are going to filter down the DataFrame a little bit, searching for indicators that contain the either the word women or male so we will have a smaller group of indicators, only those that include gender.
+Now let's see how to access several rows per value (how many lines, or SubTopics, has the Topic "Economy"):
+
+```{r}
+# We are selecting the rows where the TopicName is Economy, notice the comma afterwards meaning we ar selecting all the columns for all the rows that fulfill this condition.
+economy <- meta_ind[meta_ind$TopicName == "Economy", ]
+nrow(economy)
+```
 
 
+
+##### 4.1.4.1  Filtering tables
+We are going to filter down the DataFrame a little bit, searching for gender indicators, i.e. indicators that contain either the word "women" or "male" in its description, so we will have a smaller group of indicators, only those that include gender.
+
+First we create a filter called gender_filter:
 ```{r}
 # First, we need to create the filter, searching for those keywords in the column IndicatorName. We add ignore.case so we can search for women or Women indistinctly.
-boolean_filter <- grepl(pattern = "women|male", meta_ind$IndicatorName, ignore.case = TRUE)
+gender_filter <- grepl(pattern = "women|male", meta_ind$IndicatorName, ignore.case = TRUE)
 
 # The filter returns the rows with matching conditions, lets see the first elements of the filter with the command head
-head(boolean_filter)
+head(gender_filter)
 ```
+Then we applied the filter to the DataFrame and create a new DataFrame called **meta_ind_gender**:
 ```{r}
 library(dplyr)
 
 # We create a new DataFrame meta_ind_gender applying the filter we created to the original one
 meta_ind_gender <- filter(meta_ind, boolean_filter)
 
-# How many lines has the new table? Remember you can check the size of the new object in the Environment tab on the upper right corner
+# How many lines has the new table? Remember you can check the size of the new object also in the Environment tab on the upper right corner
 nrow(meta_ind_gender)
 ```
 
 
-##### Grouping inside tables
+##### 4.1.4.2 Grouping inside tables
+We want to know for the **meta_ind_gender** DataFrame or table how many different SubTopicName we have:
 
 ```{r}
-#unique(meta_ind_gender$SubTopicName)
+# We use the group_by command to create the grouped object
 grouped <- group_by(meta_ind_gender,meta_ind_gender$SubTopicName)
+# Summarise reduces multiple values down to a single value, is typically used on grouped data 
 summarise(grouped,   n = n())
 ```
 
-##### Searching the indicators of interest
-Reading all the demographics indicators related to gender
+#### 4.1.5 Searching the indicators of interest
+
+##### 4.1.5.1 Creating tables for Labor Market and Education
+
+Reading **education** indicators related to gender and storing it into **meta_ind_g_edu**:
 
 ```{r}
-meta_ind_gender_demo <- meta_ind_gender[meta_ind_gender$SubTopicName == "Demographics", ]
-class(meta_ind_gender_demo)
-names(meta_ind_gender_demo)
-#meta_ind_gender_demo[c("IndicatorCode", "IndicatorName")]
-select(meta_ind_gender_demo, IndicatorCode, IndicatorName) 
+meta_ind_g_edu <- meta_ind_gender[meta_ind_gender$SubTopicName == "Education", c("IndicatorCode", "IndicatorName")]
 ```
 
 
-Reading labor market indicators related to gender
-```{r}
-meta_ind_gender_labo <- meta_ind_gender[meta_ind_gender$SubTopicName == "Labor Market", ]
-class(meta_ind_gender_labo)
-select(meta_ind_gender_labo, IndicatorCode, IndicatorName)
+Reading **labor market** indicators related to gender and storing it into **meta_ind_g_labo**:
 
+```{r}
+# As we´ve seen before we select all the files that contain "Labor Market in the column SubTopicName". In this case we only want two columns IndicatorCode and IndicatorName so we indicate that after the comma.
+meta_ind_g_labo <- meta_ind_gender[meta_ind_gender$SubTopicName == "Labor Market", c("IndicatorCode", "IndicatorName")]
 ```
 
-Reading edu indicators related to gender
-```{r}
-meta_ind_gender_edu <- meta_ind_gender[meta_ind_gender$SubTopicName == "Education", ]
-class(meta_ind_gender_edu)
-meta_ind_gender_edu[c("IndicatorCode", "IndicatorName")]
-```
+
+##### 4.1.5.2 Finding global indicators
+
+We are looking for indicators from 15-64 age, since they are divided in age ranges and this is the wider range. Also we are looking in this case for females and males both from rural and urban areas.
+
 
 ```{r}
-
-boolean_filter_edu <- grepl(pattern = "Quint \\(all individuals\\), 15-64 age", meta_ind_gender_edu$IndicatorName)
-
-# The filter returns the rows with matching conditions, lets see the first elements of the filter with the command head
-boolean_filter_edu
-
-filter(meta_ind_gender_edu, boolean_filter_edu)
+# We create and apply a filter like before
+filter_edu <- grepl(pattern = "15-64 age", meta_ind_g_edu$IndicatorName)
+filter(meta_ind_g_edu, filter_edu)
 ```
 
 
 ```{r}
+#This is a more complicated filter using regular expressions, because if we use the 15-64 it returns too many values
+filter_labo <- grepl(pattern = "employment rate, [a-z]*male, no quint data, 15-64", meta_ind_g_labo$IndicatorName, ignore.case = TRUE)
 
-boolean_filter_labo <- grepl(pattern = "employment rate, [a-z]*male, no quint data, 15-64", meta_ind_gender_labo$IndicatorName, ignore.case = TRUE)
-
-# The filter returns the rows with matching conditions, lets see the first elements of the filter with the command head
-boolean_filter_labo
-
-filter(meta_ind_gender_labo, boolean_filter_labo)
+filter(meta_ind_g_labo, filter_labo)
 ```
 
 
 
+##### 4.1.5.3 Selected indicators
+
+These are the selected indicators:
+
+* "SOC_1127": Female Employment Rate
+* "SOC_2683": Male Employment Rate
+* "SOC_1328": % Female completing prim school
+* "SOC_686": % Male completing prim school
+
+We are creating a structure to store them called vector:
+
 ```{r}
-#data<-iadbstats(country="All",frequency="year",indicatorcode="SOC_050")
-#head(data)
-#typeof(data)
-```
 
-##### Vector of indicators
-
-```{r}
-
+# Vector with indicators description
 ind_vector = c("Female Employment Rate", "Male Employment Rate",
              "% Female completing prim school",
              "% Male completing prim school") 
+
+# Names of the vectors so we can access the description easily
 names(ind_vector) = c("SOC_1127", "SOC_2683", "SOC_1328", "SOC_686") 
 ```
+
 ```{r}
 ind_vector["SOC_1127"]
 ```
 
-##### Accessing indicators data
+#### 4.1.6 Accessing indicators data
 
 
 ```{r}
@@ -321,21 +351,21 @@ grid.arrange(p1, p2, p3, p4, ncol = 2)
 
 
 ```{r}
-ggplot(data = dataGTM , aes(x=Year, y=AggregatedValue, color=CountryCode, group = CountryCode)) + 
-  geom_point() +   
-  geom_line() +
-  xlab('Year') + 
-  ylab('% house holds economically headed by females') +
-  theme(text = element_text(size=7))
+#ggplot(data = dataGTM , aes(x=Year, y=AggregatedValue, color=CountryCode, group = CountryCode)) + 
+#  geom_point() +   
+#  geom_line() +
+#  xlab('Year') + 
+#  ylab('% house holds economically headed by females') +
+#  theme(text = element_text(size=7))
 ```
 
 ```{r}
-ggplot(data = dataPAN , aes(x=Year, y=AggregatedValue, color=CountryCode, group = CountryCode)) + 
-  geom_point() +   
-  geom_line() +
-  xlab('Year') + 
-  ylab('% house holds economically headed by females') +
-  theme(text = element_text(size=7))
+#ggplot(data = dataPAN , aes(x=Year, y=AggregatedValue, color=CountryCode, group = CountryCode)) + 
+#  geom_point() +   
+#  geom_line() +
+#  xlab('Year') + 
+#  ylab('% house holds economically headed by females') +
+#  theme(text = element_text(size=7))
 ```
 
 ```{r}
