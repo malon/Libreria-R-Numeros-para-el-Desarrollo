@@ -43,48 +43,52 @@ Whereas if you select **"Chunk Output in Console"** you will see the results in 
 
 
 # 2. Setting up the environment 
-### 2.1 Necessary libraries
+### 2.1 Necessary R libraries
 Be aware that if you are using the BID corporate wifi you have to disconnect from this network and connect to the open BID-GUEST network. This is a hidden network, you might not see this network in the list of available ones. You should add a new network and type the name of the SSID manually: "BID-GUEST".
 
 ```{r}
-# This is a comment, anything written after a numeral symbol (#) insider a "Code chunk" will not be executed.
+# This is a comment, anything written after a numeral symbol (#) inside a "Code chunk" 
+# will not be executed
 ```
 
-```{r}
-# Necessary R libraries
+```{r results="hide"}
 chooseCRANmirror(graphics=FALSE, ind=1)
 
+# DEVTOOLS contains basic functions in R
+# install library
 install.packages('devtools')
+# load library
 library(devtools)
 ```
 
-```{r}
+```{r results="hide"}
+# GGPLOT will be used to create graphs
 install.packages('ggplot2')
 library(ggplot2)
 ```
 
 
 
-```{r}
-# Installing Numbers for development R library
-install_github('arcuellar88/iadbstats')
+```{r results="hide"}
+# This is the R library to access Numbers for development
+install_github('EL-BID/Libreria-R-Numeros-para-el-Desarrollo')
 library('iadbstats') 
 ```
 
-----> Add a check code for checking if the libraries were installed
 
 
 # 3. The express path: results in ten seconds
 
 In this chunk of code we just use two functions:
 
-* first one is **"iadbstats"**, with which we are accessing the API to retrieve an indicator and we store the result in the variable data. To call **iadbstats** directly we should know the name of the indicator we want to download, in this case SOC_050 which is the identifier of the indicator "% of households economically headed by females"
+* first one is **"iadbstats"**, with which we are accessing the API to retrieve an indicator and we store the result in the variable data. To call **iadbstats** directly we should know the name of the indicator we want to download, in this case **SOC_050** which is the identifier of the indicator **"% of households economically headed by females"**
 * second one is **"ggplot"** a function to plot graphs in this case we are combining a **point graph** and a **line graph**
 
 You can run the chunk of code and see the results, the code is not that difficult to understand, and you can change anything you want in your graph and rerun the chunk so you can se your results.
 
 
 ```{r}
+# note that the arrow "<-" is the same than "=", we are assigning a value to the variable data
 data <- iadbstats(country="ARG,COL",frequency="year",indicatorcode="SOC_050")
 ggplot(data, aes(x=Year, y=AggregatedValue, color=CountryTableName, group = CountryTableName)) + 
   geom_point() +   
@@ -159,9 +163,9 @@ class(meta_ind)
 nrow(meta_ind)
 ```
 
-**DataFrames** are objects that store data tables. You can also see the objects you have created so far in the tab Environment (upper right corner of your RStudio editor). As you can see meta_ind has 1730 rows (observations) and 25 variables (columns). Clicking on the little table on the right of meta_ind you will open a view of the table in the main window.
+**DataFrames** are objects that store data tables. You can also see the objects you have created so far in the tab Environment (upper right corner of your RStudio editor). As you can see meta_ind has 1730 rows (observations) and 25 variables (columns). Clicking on the object **meta_ind** you will open a view of the table in the main window.
 
-##### 4.1.4. a.Accessing columns
+##### 4.1.4.a. Accessing columns in a DataFrame
 Let´s access only one of the columns, and see how many different values it has:
 
 ```{r}
@@ -171,7 +175,7 @@ topics <- meta_ind$TopicName
 unique(topics)
 ```
 
-##### 4.1.4 b.Accessing rows
+##### 4.1.4.b. Accessing rows in a DataFrame
 Now let's see how to access several rows per value (how many lines, or SubTopics, has the Topic "Economy"):
 
 ```{r}
@@ -182,7 +186,7 @@ nrow(economy)
 
 
 
-##### 4.1.4. c.Filtering tables
+##### 4.1.4.c. Filtering DataFrames
 We are going to filter down the DataFrame a little bit, searching for gender indicators, i.e. indicators that contain either the word "women" or "male" in its description, so we will have a smaller group of indicators, only those that include gender.
 
 First we create a filter called gender_filter:
@@ -199,10 +203,11 @@ head(gender_filter)
 Then we applied the filter to the DataFrame and create a new DataFrame called **meta_ind_gender**:
 
 ```{r}
+# We need to load the library dplyr to use its filter function
 library(dplyr)
 
 # We create a new DataFrame meta_ind_gender applying the filter we created to the original one
-meta_ind_gender <- filter(meta_ind, boolean_filter)
+meta_ind_gender <- filter(meta_ind, gender_filter)
 
 # How many lines has the new table? 
 # Remember that you can check the size of the new object also in the Environment tab on the upper right corner
@@ -210,40 +215,45 @@ nrow(meta_ind_gender)
 ```
 
 
-##### 4.1.4 d.Grouping inside tables
+##### 4.1.4.d. Grouping inside DataFrames
 We want to know for the **meta_ind_gender** DataFrame or table how many different SubTopicName we have:
 
 ```{r}
-# We use the group_by command to create the grouped object
+# We use the group_by command (from dplyr library) to create the grouped object
 grouped <- group_by(meta_ind_gender,meta_ind_gender$SubTopicName)
-# Summarise reduces multiple values down to a single value, is typically used on grouped data 
+# Summarise (from dplyr library) reduces multiple values down to a single value, 
+# it is typically used on grouped data 
 summarise(grouped,   n = n())
 ```
 
 #### 4.1.5 Searching the indicators of interest
 
-##### 4.1.5  a.Creating tables for Labor Market and Education gender indicators
+Now that we know what the API responds when asking for indicators metada, we are going to select what indicator we are going to ask the API about.
+
+##### 4.1.5.a. Creating tables for Labor Market and Education gender indicators
 
 Reading **education** indicators related to gender and storing it into **meta_ind_g_edu**:
 
-```{r}
+```{r results="hide"}
 # As we´ve seen before we select all the lines that contain "Education"  in the column "SubTopicName". 
 # In this case we only want two columns IndicatorCode and IndicatorName so we indicate that after the comma.
 meta_ind_g_edu <- meta_ind_gender[meta_ind_gender$SubTopicName == "Education", c("IndicatorCode", "IndicatorName")]
+head(meta_ind_g_edu)
 ```
 
 
 Reading **labor market** indicators related to gender and storing it into **meta_ind_g_labo**:
 
-```{r}
+```{r results="hide"}
 # We do the same for "Labor Market" SubtopicName
 meta_ind_g_labo <- meta_ind_gender[meta_ind_gender$SubTopicName == "Labor Market", c("IndicatorCode", "IndicatorName")]
+head(meta_ind_g_labo)
 ```
 
 
 ##### 4.1.5  b.Finding global indicators (15-64)
 
-We are looking for indicators from 15-64 age, since they are divided in age ranges and this is the wider range. Also we are looking in this case for females and males both from rural and urban areas.
+We are looking for indicators from 15-64 age, since they are divided in age ranges and this is the wider range. Also we are looking in this case for females and males both from rural and urban areas and withouth quintile division for low or high income.
 
 
 ```{r}
@@ -271,17 +281,17 @@ These are the selected indicators:
 * "SOC_1328": % Female completing prim school
 * "SOC_686": % Male completing prim school
 
-We create a structure to store them called vector:
+We create a structure to store them called vector, like a list of components. We use to create it the funcion **"c"**:
 
 ```{r}
 
 # Vector with indicators description
-ind_vector = c("Female Employment Rate", "Male Employment Rate",
+ind_vector <- c("Female Employment Rate", "Male Employment Rate",
              "% Female completing prim school",
              "% Male completing prim school") 
 
 # Names of the vectors so we can access the description easily
-names(ind_vector) = c("SOC_1127", "SOC_2683", "SOC_1328", "SOC_686") 
+names(ind_vector) <- c("SOC_1127", "SOC_2683", "SOC_1328", "SOC_686") 
 ```
 
 ```{r}
@@ -290,21 +300,22 @@ ind_vector["SOC_1127"]
 
 ### 4.2 Accessing indicators data through the API
 
---> comment
+Now that we know from which indicators we want to ask the API about we are going to use the function **iadbstats.list** from the iadbstats library with the list of indicators we want to retrieve data from. And we store the results in a DataFrame called **ind_data**.
+
+The function **iadbstats.list** pulls the data for a vector of indicators and *ALL* the countries. We could have used the function **iadbstats** that we used in chapter 3 in order to select just a list of countries.
+
 ```{r}
-#Download indicator data for a vector of indicators and all the countries
-ind_data<-iadbstats.list(indicatorCodes = names(ind_vector))
-#Select columns
-#ind2<-iadbstats.list(indicatorCodes=meta_indicators_gender$IndicatorCode)
-#Select columns
-#ind2_data <-select(ind2, -CountryTableName, -IndicatorName, -SubTopicName , -Quarter, -Month, -AggregationLevel, -UOM, -TopicName)
-work_data <- select(ind_data, CountryCode, IndicatorCode, Year, AggregatedValue, IndicatorName)
+# Download indicator data for a vector of indicators and all the countries
+ind_data <- iadbstats.list(indicatorCodes = names(ind_vector))
+
+# Select columns just the columns we are interested in
+work_data <- ind_data[c("CountryCode", "IndicatorCode", "Year", "AggregatedValue", "IndicatorName")] 
 head(work_data)
 unique(work_data$IndicatorCode)
 unique(work_data$CountryCode)
 ```
 
---> comment
+--> comment why we need to make numeric this column
 ```{r}
 typeof(work_data$AggregatedValue)
 ```
@@ -328,19 +339,15 @@ head(work_data)
 subset1 <- subset(work_data, IndicatorCode == "SOC_1328" )
                   #& (CountryCode == 'GTM' | CountryCode == 'URY' | CountryCode == 'ECU' | CountryCode == 'PAN') )
 head(subset1)
-#ggplot(ind2_data[L,] , aes(x=Year, y=AggregatedValue, color=IndicatorCode, group = IndicatorCode)) + 
-ggplot(data = subset1 , aes(x=Year, y=Percentage, color=CountryCode, group = CountryCode)) + 
+ggplot(data = subset1 , aes(x=Year, y=Percentage, color=CountryCode, group = CountryCode)) +
   geom_point() +   
   geom_line() +
   xlab('Year') + 
   ylab('% house holds economically headed by females') +
   theme(text = element_text(size=7)) +
-  scale_y_continuous(breaks = seq(20, 100, 5))
+  scale_y_continuous(breaks = seq(20, 100, 5)) +
+  scale_x_discrete(breaks = seq(1986, 2017, 2))
 
-#+  scale_y_discrete(breaks = seq(20, 100, by = 20))
-
-#+ scale_y_discrete(labels=comma)
-#+  scale_y_discrete(breaks = seq(20, 100, by = 10))
 ```
 
 ```{r}
@@ -388,7 +395,7 @@ ind_vector["SOC_1127"]
 
 
 
-```{r}
+```{r results="hide"}
 install.packages('gridExtra')
 library('gridExtra')
 ```
