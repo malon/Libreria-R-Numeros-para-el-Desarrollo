@@ -81,6 +81,8 @@ library('iadbstats')
 
 # 3. The express path: results in ten seconds
 
+We are going to access the API and create a fast plot representing the Percentage of house holds economically headed by females, comparing a couple of countries.
+
 In this chunk of code we just use two functions:
 
 * first one is **"iadbstats"**, with which we are accessing the API to retrieve an indicator and we store the result in the variable data. To call **iadbstats** directly we should know the name of the indicator we want to download, in this case **SOC_050** which is the identifier of the indicator **"% of households economically headed by females"**
@@ -96,7 +98,7 @@ ggplot(data, aes(x=Year, y=AggregatedValue, color=CountryTableName, group = Coun
   geom_point() +   
   geom_line() +
   xlab('Year') + 
-  ylab('% house holds economically headed by females') +
+  ylab('% Percentage') +
   theme(text = element_text(size=7)) +
   ggtitle('% house holds economically headed by females') +
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"))
@@ -109,7 +111,7 @@ ggplot(data, aes(x=Year, y=AggregatedValue, color=CountryTableName, group = Coun
 * When **All** country data is requested, data can be requested for a maximum of 10 indicators (ex: indicatorcode="SOC_050,SOC_1050")
 
 ### 3.1 Exporting this graph
-Later in this workshop we will create an HTML file where you will keep your code, your results and your instructions. But if you want to export this very graph right now do this:
+Later in this workshop we will create an HTML file where you will keep your code, your results and your instructions. But if you want to export this plot right now do this:
 
 * Change the output to console as we explained before (press the little wheel of the menu and select **Chunk Output in Console**, select **keep your output** in the pop up menu, to keep what you already have in your file, if you remove it you can recreate it later)
 * Run again the **Code chunk**, you will see the graph now in the lower right window under the tag Plots. 
@@ -311,10 +313,11 @@ Now that we know from which indicators we want to ask the API about we are going
 
 The function **iadbstats.list** pulls the data for a vector of indicators and *ALL* the countries. We could have used the function **iadbstats** that we used in chapter 3 in order to select just a list of countries.
 
---> review if we should use this function or the iadbstats function
+
 ```{r}
 # Download indicator data for a vector of indicators and all the countries
 ind_data <- iadbstats.list(indicatorCodes = names(ind_vector))
+ind_data <- iadbstats(country="All",frequency="year",indicatorcode="SOC_1127,SOC_2683,SOC_1328,SOC_686")
 
 # Select columns just the columns we are interested in
 work_data <- ind_data[c("CountryCode", "IndicatorCode", "Year", "AggregatedValue", "IndicatorName")] 
@@ -332,7 +335,7 @@ typeof(work_data$AggregatedValue)
 
 #####4.2.1. Converting percentages to numeric and creating a new column
 
-We are going to create a new column in that DataFram named **Percentage**, transforming the values of **AggregatedValue** into numbers.
+We are going to create a new column in that DataFrame named **Percentage**, transforming the values of **AggregatedValue** into numbers.
 
 ```{r}
 work_data$Percentage <- as.numeric(as.character(work_data$AggregatedValue))
@@ -367,8 +370,8 @@ head(work_data)
 max(work_data$Year)
 work_data_2016 <- work_data[work_data$Year == "2016" & (work_data$IndicatorCode == "SOC_1127" | work_data$IndicatorCode =="SOC_2683"), ]
 head(work_data_2016)
-unique(work_data$CountryCode)
-unique(work_data$IndicatorCode)
+unique(work_data_2016$CountryCode)
+unique(work_data_2016$IndicatorCode)
 unique(work_data_2016$Year)
 work_data_2016$Gender <- ifelse(work_data_2016$IndicatorCode == "SOC_1127", "Female", "Male")
 head(work_data_2016)
@@ -380,12 +383,34 @@ head(work_data_2016)
 ggplot(data=work_data_2016, aes(x=CountryCode, y=Percentage, fill=Gender)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black") +
     scale_fill_manual(values=c("#7fbf7b", "#67a9cf")) +
-    ggtitle('Employment rate') +
+    ggtitle('Employment rate 2016') +
     theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold")) +
     xlab("Country")
   
   
 ```
+
+#####4.2.4. Plotting - let's use Excel Pivot Tables
+
+
+```{r}
+head(work_data)
+max(work_data$Year)
+edu_data_2016 <- work_data[work_data$Year == "2016" & (work_data$IndicatorCode == "SOC_1328" | work_data$IndicatorCode =="SOC_686"), ]
+head(edu_data_2016)
+unique(edu_data_2016$CountryCode)
+unique(edu_data_2016$IndicatorCode)
+unique(edu_data_2016$Year)
+edu_data_2016$Gender <- ifelse(edu_data_2016$IndicatorCode == "SOC_1328", "Female", "Male")
+head(work_data_2016)
+```
+
+```{r}
+#write.csv(edu_data_2016, file="edu_data_2016.csv")
+```
+
+
+
 
 #####4.2.4. Plotting - multiple plots
 
