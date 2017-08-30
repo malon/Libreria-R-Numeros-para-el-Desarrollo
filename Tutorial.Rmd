@@ -2,7 +2,9 @@
 title: "Taller R BID"
 author: "Marta Alonso Fernandez (martaal@iadb.org) & Jose Luis Delgado Davara (josede@iadb.org)"
 date: "Thursday, July 31, 2017"
-output: html_notebook
+output:
+  html_document: default
+  html_notebook: default
 ---
 
 # 1. Introduction
@@ -101,7 +103,7 @@ ggplot(data, aes(x=Year, y=AggregatedValue, color=CountryTableName, group = Coun
 ```
 
 
-**NOTE**: You can use All for **countries** and **indicatorcode** but not at the same time:
+**NOTE**: You can use **"All"** for **countries** and **indicatorcode** but not at the same time:
 
 * When **All** indicators data is requested, data can be requested for a maximum of 4 countries (ex: country="ARG,COL")
 * When **All** country data is requested, data can be requested for a maximum of 10 indicators (ex: indicatorcode="SOC_050,SOC_1050")
@@ -228,7 +230,12 @@ summarise(grouped,   n = n())
 
 #### 4.1.5 Searching the indicators of interest
 
-Now that we know what the API responds when asking for indicators metada, we are going to select what indicator we are going to ask the API about.
+Now that we know what the API responds when asking for indicators metada, we are going to select what indicator we are going to ask the API about. The next steps in chapter 4.1.5 will guide you through how to analyse and search this indicators with code, but there is an alternative here. In the next **code chunk** we are storing the **meta_ind_gender** DataFrame into a CVS file (command separated values) that you can open in Excell and examine all the gender indicators to decide which ones you are interested at.
+```{r}
+# Write CSV in R
+# write.csv(meta_ind_gender, file = "meta_ind_gender.csv")
+```
+
 
 ##### 4.1.5.a. Creating tables for Labor Market and Education gender indicators
 
@@ -304,6 +311,7 @@ Now that we know from which indicators we want to ask the API about we are going
 
 The function **iadbstats.list** pulls the data for a vector of indicators and *ALL* the countries. We could have used the function **iadbstats** that we used in chapter 3 in order to select just a list of countries.
 
+--> review if we should use this function or the iadbstats function
 ```{r}
 # Download indicator data for a vector of indicators and all the countries
 ind_data <- iadbstats.list(indicatorCodes = names(ind_vector))
@@ -315,13 +323,17 @@ unique(work_data$IndicatorCode)
 unique(work_data$CountryCode)
 ```
 
---> comment why we need to make numeric this column
+We have to be careful about the type of data of the **AggregateValue** column, since we want this column to contain numbers, in order to work with them. Let's check what type is it:
+
 ```{r}
 typeof(work_data$AggregatedValue)
 ```
 
 
-##### Converting percentages to numeric and creating a new column
+#####4.2.1. Converting percentages to numeric and creating a new column
+
+We are going to create a new column in that DataFram named **Percentage**, transforming the values of **AggregatedValue** into numbers.
+
 ```{r}
 work_data$Percentage <- as.numeric(as.character(work_data$AggregatedValue))
 head(work_data)
@@ -329,26 +341,26 @@ head(work_data)
 
 
 
-##### Plotting indicators data - comparing indicators by country
---> cambiar leyenda de la y
+#####4.2.2. Plotting - comparing indicators by country
+--> explanations
 ```{r}
-#ggplot(data, aes(x=Year, y=AggregatedValue, color=CountryTableName)) + geom_point() +   xlab('Year') + ylab('% house holds economically headed by females')
-
-#L = (ind2_data$CountryCode == 'GTM' | "URY" | "ECU") & (ind2_data$IndicatorCode == "SOC_1328")
-#head(L)
-subset1 <- subset(work_data, IndicatorCode == "SOC_1328" )
-                  #& (CountryCode == 'GTM' | CountryCode == 'URY' | CountryCode == 'ECU' | CountryCode == 'PAN') )
-head(subset1)
-ggplot(data = subset1 , aes(x=Year, y=Percentage, color=CountryCode, group = CountryCode)) +
+female_prim <- subset(work_data, IndicatorCode == "SOC_1328")
+#female_prim <- subset(work_data, IndicatorCode == "SOC_1328" & (CountryCode == 'ARG' | CountryCode == 'BOL' | CountryCode == 'BRA' | CountryCode == 'CHL')) 
+head(female_prim)
+ggplot(data = female_prim , aes(x=Year, y=Percentage, color=CountryCode, group = CountryCode)) +
   geom_point() +   
   geom_line() +
   xlab('Year') + 
-  ylab('% house holds economically headed by females') +
+  ylab('% Percentage') +
   theme(text = element_text(size=7)) +
   scale_y_continuous(breaks = seq(20, 100, 5)) +
-  scale_x_discrete(breaks = seq(1986, 2017, 2))
+  scale_x_discrete(breaks = seq(1986, 2017, 2)) +
+  ggtitle("% Female completing at least primary school") +
+  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"))
 
 ```
+
+#####4.2.3. Plotting - comparing indicators by country
 
 ```{r}
 head(work_data)
@@ -363,7 +375,6 @@ head(work_data_2016)
 ```
 
 
-
 ```{r}
 
 ggplot(data=work_data_2016, aes(x=CountryCode, y=Percentage, fill=Gender)) +
@@ -376,7 +387,7 @@ ggplot(data=work_data_2016, aes(x=CountryCode, y=Percentage, fill=Gender)) +
   
 ```
 
-
+#####4.2.4. Plotting - multiple plots
 
 ```{r}
 data1 <- work_data[work_data$IndicatorCode == "SOC_1127" & work_data$CountryCode == 'URY',]
@@ -440,7 +451,7 @@ grid.arrange(p1, p3, p2, p4, ncol = 2)
 ```
 
 ```{r}
-subset(ind2_data, CountryCode == 'GTM')
+#subset(ind2_data, CountryCode == 'GTM')
 ```
 
 
@@ -457,7 +468,7 @@ plot(cars)
 
 ```{r}
 # Write CSV in R
-write.csv(data1, file = "Data1.csv")
+# write.csv(data1, file = "Data1.csv")
 
 ```
 
